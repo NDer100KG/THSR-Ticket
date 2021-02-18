@@ -7,3 +7,5 @@ test.py
 
 *.png
 thsr_workspace.code-workspace
+.vscode
+db/myBooking.json

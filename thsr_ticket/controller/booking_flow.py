@@ -46,8 +46,14 @@ class BookingFlow:
         # First page. Booking options
         self.set_start_station()
         self.set_dest_station()
-        self.book_form.outbound_date = self.book_info.date_info("出發")
-        self.set_outbound_time()
+        self.set_date()
+        self.set_search_by()
+        if self.book_form.search_by == 0:
+            self.set_outbound_time()
+        elif self.book_form.search_by == 1:
+            self.set_car_id()
+        else:
+            assert NotImplementedError
         self.set_adult_ticket_num()
         self.book_form.security_code = self.input_security_code()
 
@@ -57,14 +63,16 @@ class BookingFlow:
             return result
 
         # Second page. Train confirmation
-        avail_trains = AvailTrains().parse(result.content)
-        sel = self.show_avail_trains.show(avail_trains)
-        value = avail_trains[sel-1].form_value  # Selection from UI count from 1
-        self.confirm_train.selection = value
-        confirm_params = self.confirm_train.get_params()
-        result = self.client.submit_train(confirm_params)
-        if self.show_error(result.content):
-            return result
+        if self.book_form.search_by == 0:
+            avail_trains = AvailTrains().parse(result.content)
+            sel = self.show_avail_trains.show(avail_trains)
+            # Selection from UI count from 1
+            value = avail_trains[sel - 1].form_value
+            self.confirm_train.selection = value
+            confirm_params = self.confirm_train.get_params()
+            result = self.client.submit_train(confirm_params)
+            if self.show_error(result.content):
+                return result
 
         # Third page. Ticket confirmation
         self.set_personal_id()
@@ -79,7 +87,6 @@ class BookingFlow:
         book.show(result_model)
         print("\n請使用官方提供的管道完成後續付款以及取票!!")
 
-        self.db.save(self.book_form, self.confirm_ticket)
         return result
 
     def show_history(self) -> None:
@@ -98,13 +105,35 @@ class BookingFlow:
         if self.record.dest_station is not None:
             self.book_form.dest_station = self.record.dest_station
         else:
-            self.book_form.dest_station = self.book_form.dest_station = self.book_info.station_info("到達")
+            self.book_form.dest_station = self.book_form.dest_station = self.book_info.station_info(
+                "到達"
+            )
+
+    def set_date(self) -> None:
+        if self.record.outbound_date is not None:
+            self.book_form.outbound_date = self.record.outbound_date
+        else:
+            self.book_form.outbound_date = self.book_info.date_info("出發")
+
+    def set_search_by(self) -> None:
+        if self.record.search_by is not None:
+            self.book_form.search_by = self.record.search_by
+        else:
+            print("0. 依時間搜尋")
+            print("1. 直接輸入車次")
+            self.book_form.search_by = int(input("輸入選擇(預設: {}): ".format(0)) or 0)
 
     def set_outbound_time(self) -> None:
         if self.record.outbound_time is not None:
             self.book_form.outbound_time = self.record.outbound_time
         else:
             self.book_form.outbound_time = self.book_info.time_table_info()
+
+    def set_car_id(self) -> None:
+        if self.record.car_id is not None:
+            self.book_form.car_id = self.record.car_id
+        else:
+            self.book_form.car_id = int(input("輸入車號(預設: {}): ".format(0)) or 0)
 
     def set_adult_ticket_num(self) -> None:
         if self.record.adult_num is not None:
@@ -133,7 +162,7 @@ class BookingFlow:
         print("輸入驗證碼:")
         img_arr = np.array(image)
         plt.imshow(img_arr)
-        plt.show()
+        plt.show(block=False)
         return input()
 
     def show_error(self, html: bytes) -> bool:

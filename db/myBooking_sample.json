@@ -1,0 +1,15 @@
+{
+    "_default": {
+        "1": {
+            "adult_num": "1F",
+            "car_id": 633,
+            "dest_station": 5,
+            "outbound_date": "2021/02/19",
+            "outbound_time": "1201A",
+            "personal_id": "AXXXXXXXXX",
+            "phone": "09XXXXXXXX",
+            "search_by": 1,
+            "start_station": 1
+        }
+    }
+}

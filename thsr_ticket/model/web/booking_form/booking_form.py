@@ -29,9 +29,10 @@ class BookingForm(AbstractParams):
         self._dest_station: int = None  # Required
         self._class_type: int = 0
         self._seat_prefer: str = "radio17"
-        self._search_by: int = 0
+        self._search_by: int = None
         self._outbound_date: str = None  # Required
-        self._outbound_time: str = None  # Required
+        self._outbound_time: str = "1201A"  # Required
+        self._car_id: int = 0
         self._inbound_date: str = ""
         self._inbound_time: str = ""
         self._adult_ticket_num: str = "1F"
@@ -53,7 +54,7 @@ class BookingForm(AbstractParams):
             "bookingMethod": self._search_by,
             "toTimeInputField": self._outbound_date,
             "toTimeTable": self._outbound_time,
-            "toTrainIDInputField": 0,
+            "toTrainIDInputField": self._car_id,
             "backTimeInputField": self._inbound_date,
             "backTimeTable": self._inbound_time,
             "backTrainIDInputField": "",
@@ -115,14 +116,22 @@ class BookingForm(AbstractParams):
         self._search_by = value
 
     @property
+    def car_id(self) -> int:
+        return self._car_id
+
+    @car_id.setter
+    def car_id(self, value: int) -> None:
+        self._car_id = value
+
+    @property
     def outbound_date(self) -> str:
         return self._outbound_date
 
     @outbound_date.setter
     def outbound_date(self, value: str) -> None:
         date = self._validate_date(value)
-        if (date-datetime.now()) < timedelta(seconds=60):
-            raise ValueError("Departure date should not be earlier than today")
+        # if (date-datetime.now()) < timedelta(seconds=60):
+        #     raise ValueError("Departure date should not be earlier than today")
         self._outbound_date = value
 
     @property
@@ -204,6 +213,7 @@ class BookingForm(AbstractParams):
 
     def _validate_date(self, value: Any) -> datetime:
         return datetime.strptime(value, '%Y/%m/%d')
+        # return datetime.now()
 
     def _validate_value(self, proper: str, value: Any) -> None:
         if value not in BOOKING_SCHEMA["properties"][proper]["enum"]:

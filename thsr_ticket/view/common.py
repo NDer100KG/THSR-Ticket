@@ -12,8 +12,13 @@ def history_info(hists: Iterable[Record], select: bool = True) -> int:
         print("  起程站: " + StationMapping(r.start_station).name)
         print("  到達站: " + StationMapping(r.dest_station).name)
         t_str = r.outbound_time
-        print("  出發時間: {}:{} (A: 早上, P: 下午, N: 中午)".format(t_str[:-3], t_str[-3:]))
+        print("  出發日期: " + r.outbound_date)
+        if r.search_by == 0:
+            print("  出發時間: {}:{} (A: 早上, P: 下午, N: 中午)".format(t_str[:-3], t_str[-3:]))
+        else:
+            print("  搭乘班次: " + str(r.car_id))
         print("  大人票數: " + r.adult_num[:-1])
+        print("  ")
 
     if select:
         sel = input("請選擇紀錄或是Enter跳過: ")

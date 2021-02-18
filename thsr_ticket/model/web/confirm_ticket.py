@@ -14,9 +14,9 @@ class ConfirmTicket(AbstractParams):
         params = {
             "BookingS3FormSP:hf:0": "",
             "diffOver": 1,
-            "idInputRadio": "radio36",
+            "idInputRadio": "radio40",
             "idInputRadio:idNumber": self._personal_id,
-            "eaiPhoneCon:phoneInputRadio": "radio43",
+            "eaiPhoneCon:phoneInputRadio": "radio47",
             "eaiPhoneCon:phoneInputRadio:mobilePhone": self._phone,
             "email": "",
             "agree": "on",

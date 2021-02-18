@@ -13,6 +13,7 @@ class HTTPRequest:
     def __init__(self, max_retries: int = 3) -> None:
         self.sess = requests.Session()
         self.sess.mount("https://", HTTPAdapter(max_retries=max_retries))
+        self.page_count = 0
 
         self.common_head_html: dict = {
             "Host": HTTPConfig.HTTPHeader.BOOKING_PAGE_HOST,
@@ -30,20 +31,23 @@ class HTTPRequest:
         return self.sess.get(img_url, headers=self.common_head_html)
 
     def submit_booking_form(self, params: Mapping[str, Any]) -> Response:
-        url = HTTPConfig.SUBMIT_FORM_URL.format(self.sess.cookies["JSESSIONID"])
+        url = HTTPConfig.SUBMIT_FORM_URL.format(
+            self.sess.cookies["JSESSIONID"], self.page_count)
         return self.sess.post(url, headers=self.common_head_html, params=params, allow_redirects=True)
 
     def submit_train(self, params: Mapping[str, Any]) -> Response:
+        self.page_count += 1
         return self.sess.post(
-            HTTPConfig.CONFIRM_TRAIN_URL,
+            HTTPConfig.CONFIRM_TRAIN_URL.format(self.page_count),
             headers=self.common_head_html,
             params=params,
             allow_redirects=True
         )
 
     def submit_ticket(self, params: Mapping[str, Any]) -> Response:
+        self.page_count += 1
         return self.sess.post(
-            HTTPConfig.CONFIRM_TICKET_URL,
+            HTTPConfig.CONFIRM_TICKET_URL.format(self.page_count),
             headers=self.common_head_html,
             params=params,
             allow_redirects=True

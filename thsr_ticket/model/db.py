@@ -13,12 +13,15 @@ class Record(NamedTuple):
     phone: str = None
     start_station: int = None
     dest_station: int = None
+    outbound_date: str = None
     outbound_time: str = None
+    search_by: int = None
+    car_id: int = None
     adult_num: str = None
 
 
 class ParamDB:
-    def __init__(self, db_path: str = "./.db/history.json"):
+    def __init__(self, db_path: str = "./db/myBooking.json"):
         self.db_path = db_path
         db_dir = db_path[:db_path.rfind("/")]
         if not os.path.exists(db_dir):

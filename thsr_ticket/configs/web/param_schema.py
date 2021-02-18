@@ -18,7 +18,8 @@ BOOKING_SCHEMA: Mapping[str, Any] = {
         },
         "seatCon:seatRadioGroup": {
             "type": "string",  # Seat perference
-            "enum": ["radio17", "radio19", "radio21"]  # None / Window seat / Aisle seat
+            # None / Window seat / Aisle seat
+            "enum": ["radio17", "radio19", "radio21"]
         },
         "bookingMethod": {
             "type": "integer",  # Search seat by...
@@ -35,7 +36,9 @@ BOOKING_SCHEMA: Mapping[str, Any] = {
                 "1100P", "1130P"
             ]
         },
-        "toTrainIDInputField": {"type": "integer"},
+        "toTrainIDInputField": {
+            "type": "integer",
+        },
         "backTimeInputField": {"type": "string"},
         "backTimeTable": {
             "type": "string",
