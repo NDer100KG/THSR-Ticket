@@ -1,4 +1,4 @@
-import io
+import io, cv2, sys
 from PIL import Image
 from requests.models import Response
 import matplotlib.pyplot as plt  # type: ignore
@@ -19,6 +19,8 @@ from thsr_ticket.view.web.confirm_ticket_info import ConfirmTicketInfo
 from thsr_ticket.view.web.show_booking_result import ShowBookingResult
 from thsr_ticket.view.common import history_info
 from thsr_ticket.model.db import ParamDB, Record
+from thsr_ticket.nn.model import CNN
+import torch
 
 
 class BookingFlow:
@@ -40,6 +42,17 @@ class BookingFlow:
         self.db = ParamDB()
         self.record = Record()
 
+        self.use_nn = True
+        if self.use_nn:
+            self.model = self.setup_model()
+
+    def setup_model(self):
+        model = CNN()
+        model.load("thsr_ticket/nn/model.pth")
+        model.cuda()
+        model.eval()
+        return model
+
     def run(self) -> Response:
         self.show_history()
 
@@ -55,12 +68,16 @@ class BookingFlow:
         else:
             assert NotImplementedError
         self.set_adult_ticket_num()
-        self.book_form.security_code = self.input_security_code()
+
+        if self.use_nn:
+            self.book_form.security_code = self.classify_security_code()
+        else:
+            self.book_form.security_code = self.input_security_code()
 
         form_params = self.book_form.get_params()
         result = self.client.submit_booking_form(form_params)
         if self.show_error(result.content):
-            return result
+            return False
 
         # Second page. Train confirmation
         if self.book_form.search_by == 0:
@@ -72,7 +89,7 @@ class BookingFlow:
             confirm_params = self.confirm_train.get_params()
             result = self.client.submit_train(confirm_params)
             if self.show_error(result.content):
-                return result
+                return False
 
         # Third page. Ticket confirmation
         self.set_personal_id()
@@ -80,14 +97,14 @@ class BookingFlow:
         ticket_params = self.confirm_ticket.get_params()
         result = self.client.submit_ticket(ticket_params)
         if self.show_error(result.content):
-            return result
+            return False
 
         result_model = BookingResult().parse(result.content)
         book = ShowBookingResult()
         book.show(result_model)
         print("\n請使用官方提供的管道完成後續付款以及取票!!")
 
-        return result
+        return True
 
     def show_history(self) -> None:
         hist = self.db.get_history()
@@ -164,6 +181,26 @@ class BookingFlow:
         plt.imshow(img_arr)
         plt.show(block=False)
         return input()
+    
+    def classify_security_code(self) -> str:
+        book_page = self.client.request_booking_page()
+        img_resp = self.client.request_security_code_img(book_page.content)
+        image_ori = np.array(Image.open(io.BytesIO(img_resp.content)))
+        image = cv2.resize(image_ori, (128, 128))
+        with torch.no_grad():
+            image = (
+                cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)[np.newaxis, np.newaxis, :, :] / 255.0
+            )
+            image = torch.tensor(image, dtype=torch.float32).cuda()
+            pred = CNN.decode(self.model(image))
+            pred = "".join(pred)
+
+        ### show debug image
+        # cv2.putText(image_ori, pred, (20, 20), 3, 1, (255, 0, 255))
+        # cv2.imshow("img", image_ori)
+        # cv2.waitKey(0)
+
+        return pred
 
     def show_error(self, html: bytes) -> bool:
         errors = self.error_feedback.parse(html)

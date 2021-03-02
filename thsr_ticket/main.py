@@ -11,5 +11,11 @@ if __name__ == "__main__":
     #resp = client.get_trains_by_date("2020-01-25")
     #train = Train().from_json(resp[0])
 
-    flow = BookingFlow()
-    result = flow.run()
+
+    while(1):
+        flow = BookingFlow()
+        result = flow.run()
+        if result:
+            break
+
+    print("Done process")
