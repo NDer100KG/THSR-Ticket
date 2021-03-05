@@ -4,6 +4,7 @@ test.py
 .pytest_cache/
 .db/
 .venv/
+.idea/
 
 *.png
 thsr_workspace.code-workspace
