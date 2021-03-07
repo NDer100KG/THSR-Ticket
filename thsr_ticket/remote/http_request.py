@@ -20,20 +20,23 @@ class HTTPRequest:
             "User-Agent": HTTPConfig.HTTPHeader.USER_AGENT,
             "Accept": HTTPConfig.HTTPHeader.ACCEPT_HTML,
             "Accept-Language": HTTPConfig.HTTPHeader.ACCEPT_LANGUAGE,
-            "Accept-Encoding": HTTPConfig.HTTPHeader.ACCEPT_ENCODING
+            "Accept-Encoding": HTTPConfig.HTTPHeader.ACCEPT_ENCODING,
         }
 
     def request_booking_page(self) -> Response:
-        return self.sess.get(HTTPConfig.BOOKING_PAGE_URL, headers=self.common_head_html, allow_redirects=True)
+        return self.sess.get(
+            HTTPConfig.BOOKING_PAGE_URL, headers=self.common_head_html, allow_redirects=True
+        )
 
     def request_security_code_img(self, book_page: bytes) -> Response:
         img_url = parse_security_img_url(book_page)
         return self.sess.get(img_url, headers=self.common_head_html)
 
     def submit_booking_form(self, params: Mapping[str, Any]) -> Response:
-        url = HTTPConfig.SUBMIT_FORM_URL.format(
-            self.sess.cookies["JSESSIONID"], self.page_count)
-        return self.sess.post(url, headers=self.common_head_html, params=params, allow_redirects=True)
+        url = HTTPConfig.SUBMIT_FORM_URL.format(self.sess.cookies["JSESSIONID"], self.page_count)
+        return self.sess.post(
+            url, headers=self.common_head_html, params=params, allow_redirects=True
+        )
 
     def submit_train(self, params: Mapping[str, Any]) -> Response:
         self.page_count += 1
@@ -41,7 +44,7 @@ class HTTPRequest:
             HTTPConfig.CONFIRM_TRAIN_URL.format(self.page_count),
             headers=self.common_head_html,
             params=params,
-            allow_redirects=True
+            allow_redirects=True,
         )
 
     def submit_ticket(self, params: Mapping[str, Any]) -> Response:
@@ -50,7 +53,7 @@ class HTTPRequest:
             HTTPConfig.CONFIRM_TICKET_URL.format(self.page_count),
             headers=self.common_head_html,
             params=params,
-            allow_redirects=True
+            allow_redirects=True,
         )
 
 
