@@ -4,6 +4,7 @@
   - [Installation](#installation)
   - [Inference](#inference)
   - [注意事項!!!](#注意事項)
+  - [Android](#android)
 
 The original code comes from [BreezeWhite/THSR-Ticket](https://github.com/BreezeWhite/THSR-Ticket). Thanks for the good work!
 
@@ -91,3 +92,9 @@ pip install -r requirements.txt
 - [ ] 輸入市話
 - [ ] 輸入電子郵件
 - [ ] 會員購票
+
+## Android
+
+Android app for fast ticket booking, solving captcha with tflite model.
+
+<img src=imgs/android.png>

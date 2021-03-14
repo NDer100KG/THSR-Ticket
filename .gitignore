@@ -6,7 +6,6 @@ test.py
 .venv/
 .idea/
 
-*.png
 thsr_workspace.code-workspace
 .vscode
 db/myBooking.json
